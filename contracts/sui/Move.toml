@@ -1,0 +1,12 @@
+[package]
+name = "sui_ibt"
+version = "0.0.1"
+edition = "2024.beta"
+
+[dependencies]
+Sui = { local = "../../sui/crates/sui-framework/packages/sui-framework/"}
+
+[addresses]
+sui_ibt = "0x0"
+std = "0x1"
+Sui = "0x2"

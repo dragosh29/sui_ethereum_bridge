@@ -1,27 +1,35 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+
 import "./IBTToken.sol";
 
-contract Bridge {
-    IBTToken public token;
+contract Bridge is Ownable {
+    IERC20 public token;
 
-    event TokensBurned(address indexed from, uint256 amount, string targetChain);
-    event TokensMinted(address indexed to, uint256 amount, string sourceChain);
+    event TokensBurned(address indexed user, uint256 amount, string targetChain);
+    event TokensMinted(address indexed user, uint256 amount, string sourceChain);
 
-    constructor(address tokenAddress) {
-        token = IBTToken(tokenAddress);
+    constructor(address _token) Ownable(msg.sender) {
+        token = IERC20(_token);
     }
 
-    // Burn tokens on Ethereum
-    function burnTokens(uint256 amount, string memory targetChain) public {
-        token.burn(msg.sender, amount);
+    function burnTokens(uint256 amount, string memory targetChain) external {
+        // Transfer tokens from the user to the Bridge contract
+        require(token.transferFrom(msg.sender, address(this), amount), "Transfer failed");
+        
+        // Burn the tokens (Bridge is the token owner)
+        IBTToken(address(token)).burn(address(this), amount);
+
         emit TokensBurned(msg.sender, amount, targetChain);
     }
 
-    // Mint tokens on Ethereum
-    function mintTokens(address to, uint256 amount, string memory sourceChain) public {
-        token.mint(to, amount);
-        emit TokensMinted(to, amount, sourceChain);
+    function mintTokens(address user, uint256 amount, string memory sourceChain) external onlyOwner {
+        // Mint tokens to the user
+        IBTToken(address(token)).mint(user, amount);
+
+        emit TokensMinted(user, amount, sourceChain);
     }
 }

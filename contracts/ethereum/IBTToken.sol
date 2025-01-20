@@ -5,7 +5,10 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract IBTToken is ERC20, Ownable {
-    constructor() ERC20("IBT Token", "IBT") {}
+    // Pass msg.sender to Ownable's constructor to set the deployer as the owner
+    constructor() ERC20("IBT Token", "IBT") Ownable(msg.sender) {
+        // Additional setup can go here if needed
+    }
 
     // Mint function restricted to contract owner
     function mint(address to, uint256 amount) external onlyOwner {
