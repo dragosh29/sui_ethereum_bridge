@@ -1,39 +1,25 @@
 import React, { useState } from "react";
 import { connectEthereumWallet } from "../utils/ethereum";
-import { connectSuiWallet } from "../utils/sui";
+import SuiWalletConnect from "./SuiWalletConnect";
 
-export const WalletConnect = () => {
-  const [ethAccount, setEthAccount] = useState<string | null>(null);
-  const [suiAccount, setSuiAccount] = useState<string | null>(null);
+const WalletConnect: React.FC = () => {
+  const [ethereumStatus, setEthereumStatus] = useState<string>("Not Connected");
 
   const handleEthereumConnect = async () => {
-    try {
-      const signer = await connectEthereumWallet();
-      setEthAccount(await signer.getAddress());
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const handleSuiConnect = async () => {
-    try {
-      const suiAccount = await connectSuiWallet();
-      setSuiAccount(suiAccount);
-    } catch (error) {
-      console.error(error);
-    }
+    const result = await connectEthereumWallet();
+    setEthereumStatus(result ? "Connected" : "Failed to Connect");
   };
 
   return (
     <div>
-      <h2>Connect Wallets</h2>
-      <button onClick={handleEthereumConnect}>
-        Connect Ethereum Wallet
-      </button>
-      {ethAccount && <p>Ethereum Account: {ethAccount}</p>}
-
-      <button onClick={handleSuiConnect}>Connect Sui Wallet</button>
-      {suiAccount && <p>Sui Account: {suiAccount}</p>}
+      <h1>Wallet Connect</h1>
+      <div>
+        <button onClick={handleEthereumConnect}>Connect Ethereum Wallet</button>
+        <span>{ethereumStatus}</span>
+      </div>
+      <SuiWalletConnect />
     </div>
   );
 };
+
+export default WalletConnect;

@@ -17,17 +17,14 @@ contract Bridge is Ownable {
     }
 
     function burnTokens(uint256 amount, string memory targetChain) external {
-        // Transfer tokens from the user to the Bridge contract
         require(token.transferFrom(msg.sender, address(this), amount), "Transfer failed");
         
-        // Burn the tokens (Bridge is the token owner)
         IBTToken(address(token)).burn(address(this), amount);
 
         emit TokensBurned(msg.sender, amount, targetChain);
     }
 
     function mintTokens(address user, uint256 amount, string memory sourceChain) external onlyOwner {
-        // Mint tokens to the user
         IBTToken(address(token)).mint(user, amount);
 
         emit TokensMinted(user, amount, sourceChain);
