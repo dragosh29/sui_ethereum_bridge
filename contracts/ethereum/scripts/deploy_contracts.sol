@@ -1,11 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
+import {Script} from "forge-std/Script.sol";
 import {IBTToken} from "../IBTToken.sol";
 import {Bridge} from "../Bridge.sol";
 
-contract DeployContracts {
-    function deploy() public returns (address ibtTokenAddress, address bridgeAddress) {
+contract DeployContracts is Script {
+    function run() external returns (address ibtTokenAddress, address bridgeAddress) {
+        vm.startBroadcast(); // Begin broadcasting
+
         // Deploy IBTToken
         IBTToken ibtToken = new IBTToken();
         ibtTokenAddress = address(ibtToken);
@@ -13,9 +16,7 @@ contract DeployContracts {
         // Deploy Bridge with the IBTToken address
         Bridge bridge = new Bridge(ibtTokenAddress);
         bridgeAddress = address(bridge);
-    }
 
-    function run() external returns (address ibtTokenAddress, address bridgeAddress) {
-        return deploy();
+        vm.stopBroadcast(); // End broadcasting
     }
 }

@@ -4,3 +4,4 @@ out/
 full_node_db/
 cache/
 frontend/node_modules
+broadcast/

@@ -1,28 +1,50 @@
-import React from 'react';
-import { useSuiClientQuery } from '@mysten/dapp-kit';
+import React, { useEffect, useState } from "react";
+import { useSuiClientQuery } from "@mysten/dapp-kit";
 
 const SuiQuery: React.FC<{ owner: string }> = ({ owner }) => {
-  // Query to get owned objects
-  const { data: ownedObjects, isPending: isObjectsLoading, error: objectsError } = useSuiClientQuery(
-    'getOwnedObjects',
-    { owner }
+  const [refresh, setRefresh] = useState(false);
+
+  // Query to get SUI balance
+  const { data: suiBalanceData, isPending: isSuiBalanceLoading, error: suiBalanceError, refetch: refetchSuiBalance } =
+    useSuiClientQuery('getBalance', { owner });
+
+  // Query to get IBT_TOKEN balance
+  const { data: ibtCoins, isPending: isIbtLoading, error: ibtError, refetch: refetchIbtBalance } = useSuiClientQuery(
+    'getCoins',
+    {
+      owner,
+      coinType: `${import.meta.env.VITE_SUI_CONTRACT_ADDRESS || ''}::ibt_token::IBT_TOKEN`,
+    }
   );
 
-  // Query to get balance
-  const { data: balanceData, isPending: isBalanceLoading, error: balanceError } = useSuiClientQuery(
-    'getBalance',
-    { owner }
-  );
+  // Calculate the total IBT_TOKEN balance
+  const ibtBalance = ibtCoins?.data?.reduce((sum, coin) => sum + BigInt(coin.balance), BigInt(0));
 
-  if (isObjectsLoading || isBalanceLoading) {
+  // Add a listener for transaction success to trigger balance refresh
+  useEffect(() => {
+    const handleTransactionSuccess = () => {
+      // Trigger re-fetching of balances
+      refetchSuiBalance();
+      refetchIbtBalance();
+      setRefresh((prev) => !prev); // Toggle refresh to re-render the component if needed
+    };
+
+    window.addEventListener("transactionSuccess", handleTransactionSuccess);
+
+    return () => {
+      window.removeEventListener("transactionSuccess", handleTransactionSuccess);
+    };
+  }, [refetchSuiBalance, refetchIbtBalance]);
+
+  if (isSuiBalanceLoading || isIbtLoading) {
     return <div>Loading...</div>;
   }
 
-  if (objectsError || balanceError) {
+  if (suiBalanceError || ibtError) {
     return (
       <div>
         Error:
-        {objectsError?.message || balanceError?.message}
+        {suiBalanceError?.message || ibtError?.message}
       </div>
     );
   }
@@ -34,11 +56,11 @@ const SuiQuery: React.FC<{ owner: string }> = ({ owner }) => {
         <strong>Address:</strong> {owner}
       </p>
       <p>
-        <strong>Balance:</strong> {balanceData?.totalBalance || '0'} SUI
+        <strong>SUI Balance:</strong> {suiBalanceData?.totalBalance || '0'} SUI
       </p>
-
-      {/* <h2>Your Owned Objects</h2>
-      <pre>{JSON.stringify(ownedObjects, null, 2)}</pre> */}
+      <p>
+        <strong>IBT_TOKEN Balance:</strong> {ibtBalance ? ibtBalance.toString() : '0'} IBT
+      </p>
     </div>
   );
 };

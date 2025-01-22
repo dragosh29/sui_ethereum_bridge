@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { BrowserProvider, formatUnits } from "ethers";
+import { BrowserProvider, formatUnits, Contract } from "ethers";
+import { getEthereumIbtBalance } from "../utils/ethereum";
 
 const EthereumQuery: React.FC = () => {
   const [account, setAccount] = useState<string | null>(null);
-  const [balance, setBalance] = useState<string | null>(null);
+  const [ethBalance, setEthBalance] = useState<string | null>(null);
+  const [tokenBalance, setTokenBalance] = useState<string | null>(null);
   const [status, setStatus] = useState<string>("Loading...");
 
   // Load Ethereum data
@@ -24,7 +26,11 @@ const EthereumQuery: React.FC = () => {
 
         // Fetch ETH balance
         const rawBalance = await provider.getBalance(address);
-        setBalance(formatUnits(rawBalance, 18)); // Convert from wei to ETH
+        setEthBalance(formatUnits(rawBalance, 18)); // Convert from wei to ETH
+
+        const tokenBalance = await getEthereumIbtBalance();
+        setTokenBalance(tokenBalance);
+        
       } catch (error: any) {
         setStatus(error.message || "Error fetching Ethereum data.");
       }
@@ -41,7 +47,8 @@ const EthereumQuery: React.FC = () => {
     <div>
       <h2>Ethereum Account</h2>
       <p>Address: {account}</p>
-      <p>Balance: {balance} ETH</p>
+      <p>ETH Balance: {ethBalance || "0"} ETH</p>
+      <p>IBT_TOKEN Balance: {tokenBalance || "0"} IBT</p>
     </div>
   );
 };

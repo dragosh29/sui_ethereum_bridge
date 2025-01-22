@@ -1,4 +1,4 @@
-import { BrowserProvider, Contract, parseUnits } from "ethers";
+import { BrowserProvider, Contract, formatUnits, parseUnits } from "ethers";
 
 let provider: BrowserProvider;
 let signer: any;
@@ -36,9 +36,11 @@ const getContractAddress = () => {
 export const burnEthereumTokens = async (amount: number) => {
   const abi = getAbi("VITE_ETH_BURN_ABI");
   const contractAddress = getContractAddress();
-  const contract = new Contract(contractAddress, abi, signer);
 
-  const tx = await contract.burn(parseUnits(amount.toString(), 18));
+  const contract = new Contract(contractAddress, abi, signer);
+  const address = await signer.getAddress();
+
+  const tx = await contract.burn(address, parseUnits(amount.toString(), 18));
   await tx.wait();
 };
 
@@ -47,7 +49,27 @@ export const mintEthereumTokens = async (amount: number) => {
   const contractAddress = getContractAddress();
 
   const contract = new Contract(contractAddress, abi, signer);
+  const address = await signer.getAddress();
 
-  const tx = await contract.mint(parseUnits(amount.toString(), 18));
+  const tx = await contract.mint(address, parseUnits(amount.toString(), 18));
   await tx.wait();
+};
+
+export const getEthereumIbtBalance = async (): Promise<string> => {
+  if (!signer) {
+    throw new Error("Signer not initialized. Connect the wallet first.");
+  }
+  try {
+    const abi = getAbi("VITE_ETH_BALANCE_ABI");
+    const contractAddress = getContractAddress();
+
+    const contract = new Contract(contractAddress, abi, signer);
+    const address = await signer.getAddress();
+
+    const rawBalance = await contract.balanceOf(address);
+    return formatUnits(rawBalance, 18); // Convert from wei to human-readable format
+  } catch (error) {
+    console.error("Error fetching IBT balance:", error);
+    throw error;
+  }
 };

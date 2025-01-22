@@ -20,20 +20,16 @@ const TokenBridge: React.FC<TokenBridgeProps> = ({ setStatus }) => {
       if (sourceChain === "Ethereum" && destinationChain === "Sui") {
         // Burn on Ethereum (placeholder for Ethereum logic)
         setStatus("Burning tokens on Ethereum...");
-        // Assume you have a function burnEthereumTokens
         await burnEthereumTokens(tokenAmount);
 
-        // Mint on Sui
         setStatus("Minting tokens on Sui...");
         const mintStatus = await handleMint(tokenAmount, mutateAsync);
         setStatus(mintStatus);
       } else if (sourceChain === "Sui" && destinationChain === "Ethereum") {
-        // Burn on Sui
         setStatus("Burning tokens on Sui...");
         const burnStatus = await handleBurn(tokenAmount, mutateAsync);
         setStatus(burnStatus);
 
-        // Mint on Ethereum (placeholder for Ethereum logic)
         setStatus("Minting tokens on Ethereum...");
         await mintEthereumTokens(tokenAmount);
       } else {

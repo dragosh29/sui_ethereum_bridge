@@ -1,14 +1,6 @@
-import { SuiClient } from "@mysten/sui/client";
 import { useSignAndExecuteTransaction } from "@mysten/dapp-kit";
 import { burnSuiTokens, mintSuiTokens } from "./sui";
 
-const suiClient = new SuiClient({
-    url: import.meta.env.VITE_SUI_URL || "",
-  });
-
-  const contractAddress = import.meta.env.VITE_SUI_CONTRACT_ADDRESS || "";
-  const bridgeAdminObjectId = import.meta.env.VITE_SUI_BRIDGE_ADMIN_OBJECT_ID || "";
-  const userAddress = import.meta.env.VITE_SUI_USER_ADDRESS || "";
 
 // Burn tokens on the Sui blockchain
 export const handleBurn = async (
@@ -16,19 +8,23 @@ export const handleBurn = async (
   mutateAsync: ReturnType<typeof useSignAndExecuteTransaction>["mutateAsync"]
 ) => {
   try {
-    const tx = await burnSuiTokens(
-      amount,
-      contractAddress,
-      suiClient,
-      userAddress,
-      bridgeAdminObjectId
-    );
+    const tx = await burnSuiTokens(amount);
 
     const result = await mutateAsync({ transaction: tx });
 
     if ("digest" in result) {
+      window.dispatchEvent(
+        new CustomEvent("transactionSuccess", {
+          detail: { type: "burn", digest: result.digest },
+        })
+      );
       return `Burn transaction successful! Digest: ${result.digest}`;
     } else if (result.effects?.bcs) {
+      window.dispatchEvent(
+        new CustomEvent("transactionSuccess", {
+          detail: { type: "burn", effects: result.effects.bcs },
+        })
+      );
       return `Burn transaction successful! Effects: ${result.effects.bcs}`;
     } else {
       return "Burn transaction executed successfully, but no digest available.";
@@ -48,13 +44,23 @@ export const handleMint = async (
   mutateAsync: ReturnType<typeof useSignAndExecuteTransaction>["mutateAsync"]
 ) => {
   try {
-    const tx = mintSuiTokens(amount, contractAddress);
+    const tx = mintSuiTokens(amount);
 
     const result = await mutateAsync({ transaction: tx });
 
     if ("digest" in result) {
+      window.dispatchEvent(
+        new CustomEvent("transactionSuccess", {
+          detail: { type: "mint", digest: result.digest },
+        })
+      );
       return `Mint transaction successful! Digest: ${result.digest}`;
     } else if (result.effects?.bcs) {
+      window.dispatchEvent(
+        new CustomEvent("transactionSuccess", {
+          detail: { type: "mint", effects: result.effects.bcs },
+        })
+      );
       return `Mint transaction successful! Effects: ${result.effects.bcs}`;
     } else {
       return "Mint transaction executed successfully, but no digest available.";
