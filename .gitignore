@@ -1,4 +1,4 @@
-sui/
+contracts/sui/build
 lib/
 out/
 full_node_db/
