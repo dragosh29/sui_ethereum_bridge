@@ -1,25 +1,20 @@
 module sui_ibt::ibt_token {
     use sui::coin;
 
-    /// The IBT_TOKEN , using One-Time Witness (OTW) semantics.
     public struct IBT_TOKEN has drop {}
 
-    /// Initializes the IBT_TOKEN token and assigns a treasury cap to the creator. 
     fun init(otw: IBT_TOKEN, ctx: &mut TxContext) {
         let (treasury_cap, metadata) = coin::create_currency<IBT_TOKEN>(
-            otw,                   // Witness for the OTW type
-            9u8,                      // Decimals for the token
-            b"IBT_TOKEN",                   // Token name
-            b"IBT_TOKEN Coin",              // Token display name
-            b"This is the IBT_TOKEN token used to bridge SUI to ETH.", // Description
-            option::none(),           // Optional URL for metadata
+            otw,
+            9u8,
+            b"IBT_TOKEN",
+            b"IBT_TOKEN Coin",
+            b"This is the IBT_TOKEN token used to bridge SUI to ETH.", 
+            option::none(),
             ctx
         );
 
-        // Freeze the metadata to prevent modifications.
         transfer::public_freeze_object(metadata);
-
-        // Transfer the treasury cap to the creator.
         transfer::public_transfer(treasury_cap, ctx.sender());
     }
 

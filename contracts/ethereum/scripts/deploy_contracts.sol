@@ -7,16 +7,15 @@ import {Bridge} from "../Bridge.sol";
 
 contract DeployContracts is Script {
     function run() external returns (address ibtTokenAddress, address bridgeAddress) {
-        vm.startBroadcast(); // Begin broadcasting
+        vm.startBroadcast();
 
         // Deploy IBTToken
         IBTToken ibtToken = new IBTToken();
         ibtTokenAddress = address(ibtToken);
 
-        // Deploy Bridge with the IBTToken address
         Bridge bridge = new Bridge(ibtTokenAddress);
         bridgeAddress = address(bridge);
 
-        vm.stopBroadcast(); // End broadcasting
+        vm.stopBroadcast();
     }
 }

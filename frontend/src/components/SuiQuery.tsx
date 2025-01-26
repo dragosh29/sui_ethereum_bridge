@@ -4,35 +4,34 @@ import { useSuiClientQuery } from "@mysten/dapp-kit";
 const SuiQuery: React.FC<{ owner: string }> = ({ owner }) => {
   const [refresh, setRefresh] = useState(false);
 
-  // Query to get SUI balance
   const { data: suiBalanceData, isPending: isSuiBalanceLoading, error: suiBalanceError, refetch: refetchSuiBalance } =
-    useSuiClientQuery('getBalance', { owner });
+    useSuiClientQuery("getBalance", { owner });
 
-  // Query to get IBT_TOKEN balance
   const { data: ibtCoins, isPending: isIbtLoading, error: ibtError, refetch: refetchIbtBalance } = useSuiClientQuery(
-    'getCoins',
+    "getCoins",
     {
       owner,
-      coinType: `${import.meta.env.VITE_SUI_CONTRACT_ADDRESS || ''}::ibt_token::IBT_TOKEN`,
+      coinType: `${import.meta.env.VITE_SUI_CONTRACT_ADDRESS || ""}::ibt_token::IBT_TOKEN`,
     }
   );
 
-  // Calculate the total IBT_TOKEN balance
   const ibtBalance = ibtCoins?.data?.reduce((sum, coin) => sum + BigInt(coin.balance), BigInt(0));
 
-  // Add a listener for transaction success to trigger balance refresh
+  // add a listener for transaction success to trigger balance refresh
   useEffect(() => {
-    const handleTransactionSuccess = () => {
-      // Trigger re-fetching of balances
-      refetchSuiBalance();
-      refetchIbtBalance();
-      setRefresh((prev) => !prev); // Toggle refresh to re-render the component if needed
+    const handleTransactionSuccess = async () => {
+
+      // short delay to ensure blockchain state is finalized
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      await Promise.all([refetchSuiBalance(), refetchIbtBalance()]);
+      setRefresh((prev) => !prev);
     };
 
-    window.addEventListener("transactionSuccess", handleTransactionSuccess);
+    window.addEventListener("suiTransactionSuccess", handleTransactionSuccess as EventListener);
 
     return () => {
-      window.removeEventListener("transactionSuccess", handleTransactionSuccess);
+      window.removeEventListener("suiTransactionSuccess", handleTransactionSuccess as EventListener);
     };
   }, [refetchSuiBalance, refetchIbtBalance]);
 
@@ -56,10 +55,10 @@ const SuiQuery: React.FC<{ owner: string }> = ({ owner }) => {
         <strong>Address:</strong> {owner}
       </p>
       <p>
-        <strong>SUI Balance:</strong> {suiBalanceData?.totalBalance || '0'} SUI
+        <strong>SUI Balance:</strong> {suiBalanceData?.totalBalance || "0"} SUI
       </p>
       <p>
-        <strong>IBT_TOKEN Balance:</strong> {ibtBalance ? ibtBalance.toString() : '0'} IBT
+        <strong>IBT_TOKEN Balance:</strong> {ibtBalance ? ibtBalance.toString() : "0"} IBT
       </p>
     </div>
   );

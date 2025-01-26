@@ -1,12 +1,10 @@
 import { Transaction } from '@mysten/sui/transactions';
 import { SuiClient } from '@mysten/sui/client';
 
-// Initialize SuiClient from environment variables
 const suiClient = new SuiClient({
   url: import.meta.env.VITE_SUI_URL || "",
 });
 
-// Environment variables
 const contractAddress = import.meta.env.VITE_SUI_CONTRACT_ADDRESS || "";
 const treasuryCapObjectId = import.meta.env.VITE_SUI_TREASURY_CAP || "";
 const userAddress = import.meta.env.VITE_SUI_USER_ADDRESS || "";
@@ -50,15 +48,14 @@ export const burnSuiTokens = async (amount: number): Promise<Transaction> => {
   // If the merged coin's balance is greater than the burn amount, split it
   const coinArgument =
     accumulatedBalance === BigInt(amount)
-      ? mergedCoin // Use the merged coin directly if exact match
-      : tx.splitCoins(mergedCoin, [burnAmount]); // Split the coin
+      ? mergedCoin
+      : tx.splitCoins(mergedCoin, [burnAmount]);
 
-  // Call the `burn` Move function
   tx.moveCall({
     target: `${contractAddress}::ibt_token::burn`,
     arguments: [
-      tx.object(treasuryCapObjectId), // Reference to the TreasuryCap object
-      coinArgument,                  // Coin to burn (split or exact match)
+      tx.object(treasuryCapObjectId),
+      coinArgument,
     ],
   });
 
@@ -70,12 +67,11 @@ export const mintSuiTokens = (amount: number): Transaction => {
   const tx = new Transaction();
   const pureAmount = tx.pure.u64(BigInt(amount));
 
-  // Call the `mint` Move function
   tx.moveCall({
     target: `${contractAddress}::ibt_token::mint`,
     arguments: [
-      tx.object(treasuryCapObjectId), // Reference to the TreasuryCap object
-      pureAmount,                    // Amount to mint
+      tx.object(treasuryCapObjectId),
+      pureAmount,
     ],
   });
 

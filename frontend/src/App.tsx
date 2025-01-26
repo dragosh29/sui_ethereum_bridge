@@ -7,7 +7,6 @@ import WalletConnect from "./components/WalletConnect";
 
 const localnet = import.meta.env.VITE_SUI_URL || null;
 
-// Define network configurations for Sui
 const networks = {
   testnet: { url: "https://fullnode.testnet.sui.io" },
   mainnet: { url: "https://fullnode.mainnet.sui.io" },
@@ -19,27 +18,27 @@ if (localnet) {
   prefferedNetwork = "localnet";
 }
 
-// Initialize the QueryClient
 const queryClient = new QueryClient();
 
 const App: React.FC = () => {
   return (
     <QueryClientProvider client={queryClient}>
-      <SuiClientProvider networks={networks} defaultNetwork={ prefferedNetwork }>
+      <SuiClientProvider networks={networks} defaultNetwork={prefferedNetwork}>
         <WalletProvider>
           <Router>
-            <div style={{ padding: "1rem", fontFamily: "Arial, sans-serif" }}>
-              <header style={{ marginBottom: "1.5rem" }}>
-                <h1>Token Management App</h1>
-                <nav>
-                  <Link to="/" style={{ marginRight: "1rem" }}>
+            <div id="aa" style={appStyles.container}>
+              <header style={appStyles.header}>
+                <h1 style={appStyles.title}>Token Management App</h1>
+                <nav style={appStyles.nav}>
+                  <Link to="/" style={appStyles.navLink}>
                     Dashboard
                   </Link>
-                  <Link to="/wallet-connect">Wallet Connect</Link>
+                  <Link to="/wallet-connect" style={appStyles.navLink}>
+                    Wallet Connect
+                  </Link>
                 </nav>
               </header>
-
-              <main>
+              <main style={appStyles.main}>
                 <Routes>
                   <Route path="/" element={<TokenDashboard />} />
                   <Route path="/wallet-connect" element={<WalletConnect />} />
@@ -51,6 +50,43 @@ const App: React.FC = () => {
       </SuiClientProvider>
     </QueryClientProvider>
   );
+};
+
+const appStyles = {
+  container: {
+    width: "100%",
+    height: "100vh",
+    display: "flex",
+    flexDirection: "column" as "column",
+    fontFamily: "Arial, sans-serif",
+  },
+  header: {
+    textAlign: "center" as "center",
+    padding: "1rem",
+    backgroundColor: "#1e1e1e",
+    color: "#f0f0f0",
+  },
+  title: {
+    fontSize: "1.75rem",
+    margin: 0,
+  },
+  nav: {
+    marginTop: "0.5rem",
+    display: "flex",
+    justifyContent: "center",
+    gap: "1rem",
+  },
+  navLink: {
+    textDecoration: "none",
+    color: "#00bcd4",
+    fontSize: "1rem",
+  },
+  main: {
+    flex: 1,
+    display: "flex",
+    flexDirection: "column" as "column",
+    overflow: "hidden",
+  },
 };
 
 export default App;

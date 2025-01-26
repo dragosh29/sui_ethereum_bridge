@@ -7,7 +7,6 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 contract IBTToken is ERC20, Ownable {
     // Pass msg.sender to Ownable's constructor to set the deployer as the owner
     constructor() ERC20("IBT Token", "IBT") Ownable(msg.sender) {
-        // Additional setup can go here if needed
     }
 
     // Mint function restricted to contract owner
